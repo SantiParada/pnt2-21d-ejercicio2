@@ -1,30 +1,46 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { ref, computed } from 'vue'
+
+const filtroNombre = ref('')
+const filtroDni = ref('')
+
+const personas = ref([
+  { nombre: 'Ana', apellido: 'Gómez', dni: '12345678' },
+  { nombre: 'Carlos', apellido: 'Pérez', dni: '87654321' },
+  { nombre: 'Lucía', apellido: 'Martínez', dni: '55554444' },
+])
+
+const personasFiltradas = computed(() =>
+  personas.value.filter(persona => {
+    const nombreCompleto = `${persona.nombre} ${persona.apellido}`.toLowerCase()
+    return (
+      nombreCompleto.includes(filtroNombre.value.toLowerCase()) &&
+      persona.dni.includes(filtroDni.value)
+    )
+  })
+)
 </script>
 
 <template>
   <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <h1>Buscar Personas</h1>
+
+    <input v-model="filtroNombre" placeholder="Buscar por nombre o apellido" class="input" />
+    <input v-model="filtroDni" placeholder="Buscar por DNI" class="input" />
+
+    <ul>
+      <li v-for="persona in personasFiltradas" :key="persona.dni">
+        {{ persona.nombre }} {{ persona.apellido }} - DNI: {{ persona.dni }}
+      </li>
+    </ul>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+.input {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  font-size: 1rem;
 }
 </style>
