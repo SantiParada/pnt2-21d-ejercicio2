@@ -1,46 +1,71 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-const filtroNombre = ref('')
-const filtroDni = ref('')
+const nombreFiltro = ref('')
+const dniFiltro = ref('')
 
 const personas = ref([
-  { nombre: 'Ana', apellido: 'Gómez', dni: '12345678' },
-  { nombre: 'Carlos', apellido: 'Pérez', dni: '87654321' },
-  { nombre: 'Lucía', apellido: 'Martínez', dni: '55554444' },
+  { nombre: 'Juan', apellido: 'Pérez', dni: '12345678' },
+  { nombre: 'María', apellido: 'García', dni: '87654321' },
+  { nombre: 'Luis', apellido: 'López', dni: '45678912' }
 ])
 
-const personasFiltradas = computed(() =>
-  personas.value.filter(persona => {
-    const nombreCompleto = `${persona.nombre} ${persona.apellido}`.toLowerCase()
-    return (
-      nombreCompleto.includes(filtroNombre.value.toLowerCase()) &&
-      persona.dni.includes(filtroDni.value)
-    )
+const mostrarAdvertencia = computed(() => {
+  const nombre = nombreFiltro.value.trim()
+  const dni = dniFiltro.value.trim()
+
+  return (
+    (nombre && nombre.length < 3) ||
+    (dni && dni.length < 3)
+  )
+})
+
+const resultados = computed(() => {
+  const nombre = nombreFiltro.value.trim().toLowerCase()
+  const dni = dniFiltro.value.trim()
+
+  if (!nombre && !dni) return []
+
+  return personas.value.filter(p => {
+    const nombreCompleto = `${p.nombre} ${p.apellido}`.toLowerCase()
+
+    if (nombre && dni) {
+      return nombreCompleto.includes(nombre) && p.dni.includes(dni)
+    } else if (nombre) {
+      return nombreCompleto.includes(nombre)
+    } else if (dni) {
+      return p.dni.includes(dni)
+    }
   })
-)
+})
 </script>
 
 <template>
-  <div>
-    <h1>Buscar Personas</h1>
+  <div class="container mt-4">
+    <h2>Buscar persona</h2>
+    <input
+      v-model="nombreFiltro"
+      type="text"
+      placeholder="Nombre o Apellido"
+      class="form-control my-2"
+    />
+    <input
+      v-model="dniFiltro"
+      type="text"
+      placeholder="DNI"
+      class="form-control mb-2"
+    />
 
-    <input v-model="filtroNombre" placeholder="Buscar por nombre o apellido" class="input" />
-    <input v-model="filtroDni" placeholder="Buscar por DNI" class="input" />
+    <!-- Advertencia -->
+    <div v-if="mostrarAdvertencia" class="alert alert-warning" role="alert">
+      Ingrese al menos 3 caracteres en los filtros para realizar la búsqueda.
+    </div>
 
-    <ul>
-      <li v-for="persona in personasFiltradas" :key="persona.dni">
-        {{ persona.nombre }} {{ persona.apellido }} - DNI: {{ persona.dni }}
+    <ul v-if="resultados.length">
+      <li v-for="p in resultados" :key="p.dni">
+        {{ p.nombre }} {{ p.apellido }} - DNI: {{ p.dni }}
       </li>
     </ul>
+    <p v-else>No hay resultados</p>
   </div>
 </template>
-
-<style scoped>
-.input {
-  display: block;
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  font-size: 1rem;
-}
-</style>
